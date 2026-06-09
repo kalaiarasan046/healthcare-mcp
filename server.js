@@ -241,7 +241,9 @@
 import "dotenv/config";
 
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+// import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import express from "express";
+import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 
 import {
   ListToolsRequestSchema,
@@ -427,25 +429,90 @@ process.on("uncaughtException", (error) => {
 | Start MCP Server
 |--------------------------------------------------------------------------
 */
+// ----MCP STUDIO SERVER
+
+// async function startServer() {
+
+//   try {
+
+//     console.error("=================================");
+//     console.error("Starting Healthcare MCP Server");
+//     console.error("=================================");
+
+//     const transport = new StdioServerTransport();
+
+//     await server.connect(transport);
+
+//     console.error("=================================");
+//     console.error("Healthcare MCP Server Running");
+//     console.error("=================================");
+
+//   } catch (error) {
+
+//     console.error("Failed to start MCP Server");
+//     console.error(error);
+
+//     process.exit(1);
+//   }
+// }
+
+// startServer();
+//------END OF STUDIO SERVER 
+
 
 async function startServer() {
-
   try {
-
     console.error("=================================");
     console.error("Starting Healthcare MCP Server");
     console.error("=================================");
 
-    const transport = new StdioServerTransport();
+    const app = express();
+
+    app.use(express.json());
+
+    const transport =
+      new StreamableHTTPServerTransport({
+        sessionIdGenerator: undefined
+      });
 
     await server.connect(transport);
 
-    console.error("=================================");
-    console.error("Healthcare MCP Server Running");
-    console.error("=================================");
+    app.all("/mcp", async (req, res) => {
+      try {
+        await transport.handleRequest(
+          req,
+          res,
+          req.body
+        );
+      } catch (error) {
+        console.error(error);
+
+        res.status(500).json({
+          error: error.message
+        });
+      }
+    });
+
+    app.get("/", (req, res) => {
+      res.json({
+        name: "Healthcare MCP Server",
+        status: "running"
+      });
+    });
+
+    const PORT =
+      process.env.PORT || 3000;
+
+    app.listen(PORT, () => {
+      console.error("=================================");
+      console.error(
+        `Healthcare MCP Server Running on Port ${PORT}`
+      );
+      console.error("MCP Endpoint: /mcp");
+      console.error("=================================");
+    });
 
   } catch (error) {
-
     console.error("Failed to start MCP Server");
     console.error(error);
 
