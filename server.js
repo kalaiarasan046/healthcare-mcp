@@ -478,6 +478,12 @@ async function startServer() {
     await server.connect(transport);
 
     app.all("/mcp", async (req, res) => {
+       console.log("=================================");
+       console.log("MCP REQUEST");
+       console.log("METHOD:", req.method);
+       console.log("BODY:", JSON.stringify(req.body));
+       console.log("=================================");
+
       try {
         await transport.handleRequest(
           req,
