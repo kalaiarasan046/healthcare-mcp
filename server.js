@@ -477,53 +477,75 @@ async function startServer() {
 
     await server.connect(transport);
 
-    app.all("/mcp", async (req, res) => {
-       console.log("=================================");
-       console.log("MCP REQUEST");
-       console.log("METHOD:", req.method);
-       console.log("BODY:", JSON.stringify(req.body));
-       console.log("=================================");
+   app.all("/mcp", async (req, res) => {
+  console.log("=================================");
+  console.log("MCP REQUEST");
+  console.log("METHOD:", req.method);
+  console.log("BODY:", JSON.stringify(req.body));
+  console.log("=================================");
 
-      try {
-        await transport.handleRequest(
-          req,
-          res,
-          req.body
-        );
-      } catch (error) {
-        console.error(error);
+  try {
+    console.log("BEFORE HANDLE REQUEST");
 
-        res.status(500).json({
-          error: error.message
-        });
-      }
-    });
+    await transport.handleRequest(
+      req,
+      res,
+      req.body
+    );
 
-    app.get("/", (req, res) => {
-      res.json({
-        name: "Healthcare MCP Server",
-        status: "running"
-      });
-    });
-
-    const PORT =
-      process.env.PORT || 3000;
-
-    app.listen(PORT, () => {
-      console.error("=================================");
-      console.error(
-        `Healthcare MCP Server Running on Port ${PORT}`
-      );
-      console.error("MCP Endpoint: /mcp");
-      console.error("=================================");
-    });
+    console.log("AFTER HANDLE REQUEST");
 
   } catch (error) {
+
+    console.error("=================================");
+    console.error("HANDLE REQUEST ERROR");
+    console.error(error);
+    console.error(error.stack);
+    console.error("=================================");
+
+    if (!res.headersSent) {
+      res.status(500).json({
+        error: error.message
+      });
+    }
+  }
+});
+  }
+  catch (error) {
     console.error("Failed to start MCP Server");
     console.error(error);
 
     process.exit(1);
-  }
-}
+  }}
 
 startServer();
+
+
+  //   app.get("/", (req, res) => {
+  //     res.json({
+  //       name: "Healthcare MCP Server",
+  //       status: "running"
+  //     });
+  //   });
+
+  //   const PORT =
+  //     process.env.PORT || 3000;
+
+  //   app.listen(PORT, () => {
+  //     console.error("=================================");
+  //     console.error(
+  //       `Healthcare MCP Server Running on Port ${PORT}`
+  //     );
+  //     console.error("MCP Endpoint: /mcp");
+  //     console.error("=================================");
+  //   });
+
+  // } catch (error) {
+  //   console.error("Failed to start MCP Server");
+  //   console.error(error);
+
+  //   process.exit(1);
+  // }
+  // }
+
+// startServer();
