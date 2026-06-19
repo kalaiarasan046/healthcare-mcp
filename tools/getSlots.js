@@ -26,7 +26,7 @@
 
 import { fetchSlots } from "../services/healthcareApi.js";
 
-export async function getSlots(input) {
+export async function getSlots(input = {}) {
   try {
     const {
       start_datetime,
@@ -87,7 +87,8 @@ export async function getSlots(input) {
             2
           )
         }
-      ]
+      ],
+      isError: true
     };
   }
 }

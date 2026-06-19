@@ -25,7 +25,7 @@
 
 import { fetchDoctors } from "../services/healthcareApi.js";
 
-export async function getDoctors(input) {
+export async function getDoctors(input = {}) {
   try {
     const { specialty } = input;
 
@@ -80,7 +80,8 @@ export async function getDoctors(input) {
             2
           )
         }
-      ]
+      ],
+      isError: true
     };
   }
 }

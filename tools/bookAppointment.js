@@ -35,7 +35,7 @@
 
 import { createAppointment } from "../services/healthcareApi.js";
 
-export async function bookAppointment(input) {
+export async function bookAppointment(input = {}) {
   try {
     const {
       specialty,
@@ -56,16 +56,31 @@ export async function bookAppointment(input) {
       throw new Error("selected_time_slot is required");
     }
 
+    const startDate = new Date(selected_time_slot);
+
+    if (Number.isNaN(startDate.getTime())) {
+      throw new Error("selected_time_slot must be a valid ISO datetime");
+    }
+
+    const endDate = new Date(startDate.getTime() + 30 * 60 * 1000);
+
     const payload = {
       resourceType: "Appointment",
       status: "booked",
       description: `${specialty} consultation with ${doctor_name}`,
-      TimeSlot: selected_time_slot,
+      start: startDate.toISOString(),
+      end: endDate.toISOString(),
       participant: [
         {
+          actor: {
+            display: doctor_name
+          },
           status: "accepted"
         },
         {
+          actor: {
+            display: "Patient"
+          },
           status: "accepted"
         }
       ]
@@ -109,7 +124,8 @@ export async function bookAppointment(input) {
             2
           )
         }
-      ]
+      ],
+      isError: true
     };
   }
 }
